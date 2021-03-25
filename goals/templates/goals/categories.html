@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Categories</h1>
+<table class='table'>
+ <tr>
+     <th>Title</th>
+     <th>Description</th>
+     <th>Motivation</th>
+ </tr>
+ {% for c in categorylist %}
+   <tr>
+       <td>{{ c.title }}</td>
+       <td>{{ c.description }}</td>
+       <td>{{ c.motivation }}</td>
+   </tr>
+ {% endfor %}
+</table>
+{% endblock %}
