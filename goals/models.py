@@ -57,6 +57,7 @@ class Reward(models.Model):
     description=models.CharField(max_length=255, null=True, blank=True)
     cost=models.SmallIntegerField(default=100)
     used=models.BooleanField(default=False, editable=False)
+    user=models.ForeignKey(User, on_delete=models.CASCADE)
  
     def __str__(self):
         return self.title
