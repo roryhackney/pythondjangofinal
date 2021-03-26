@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>{{ thiscat.title }}</h2>
+<table class='table'>
+    <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Motivation</th>
+        <th>Timeline</th>
+    </tr>
+    {% for g in catgoals %}
+      <tr>
+          <td><a href="{% url 'gsteps' id=g.pk %}">{{ g.title }}</a></td>
+          <td>{{ g.description }}</td>
+          <td>{{ g.motivation }}</td>
+          <td>{{ g.timeline }}</td>
+      </tr>
+    {% endfor %}
+   </table>
+
+<p>Category made by: {{ thiscat.user }}</p>
+
+{% endblock %}

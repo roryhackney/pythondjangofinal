@@ -9,7 +9,7 @@
  </tr>
  {% for c in categorylist %}
    <tr>
-       <td>{{ c.title }}</td>
+       <td><a href="{% url 'catgoals' id=c.pk %}">{{ c.title }}</a></td>
        <td>{{ c.description }}</td>
        <td>{{ c.motivation }}</td>
    </tr>
