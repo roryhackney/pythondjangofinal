@@ -75,52 +75,8 @@ class ProfileTest(TestCase):
     def testTable(self):
         self.assertEqual(str(self.profile), self.profile.displayname)
 
-#PAGE TESTING########################################################
-
-class IndexTest(TestCase):
-    def testUrlAccessedByName(self):
-        response=self.client.get(reverse('index'))
-        self.assertEqual(response.status_code, 200)
-
-class CatPageTest(TestCase):
-    def testUrlAccessedByName(self):
-        response=self.client.get(reverse('categories'))
-        self.assertEqual(response.status_code, 200)
-
-class RewardPageTest(TestCase):
-    def testUrlAccessedByName(self):
-        response=self.client.get(reverse('rewards'))
-        self.assertEqual(response.status_code, 200)
-
-class CatGoalsTest(TestCase):
-    def setUp(self):
-        self.u=User.objects.create(username="armando1", password='P@ssw0rd9')
-        self.cat=Category.objects.create(title='Catgoals Test', description="Test Catgoals page", motivation='For testing', user=self.u)
-        self.goals=Goal.objects.create(title='Catgoals Goal Test', description='Subgoals', motivation='For testing Catgoals subgoals', category=self.cat, timeline=datetime.date(2023, 5, 19))
-
-    def testDetailAccessedUsingID(self):
-        response=self.client.get(reverse('catgoals', args=(self.cat.id,)))
-        self.assertEqual(response.status_code, 200)
-    
-    def testNumGoals(self):
-        self.goalnum=Goal.objects.filter(category=self.cat).count()
-        self.assertEqual(self.goalnum, 1)
-
-class GstepsTest(TestCase):
-    def setUp(self):
-        self.u=User.objects.create(username="hannah7", password='P@ssw0rd9')
-        self.cat=Category.objects.create(title='Gsteps Cat Test', description="Test Catgoals page", motivation='For testing', user=self.u)
-        self.goals=Goal.objects.create(title='Gsteps Goal Test', description='Subgoals', motivation='For testing Catgoals subgoals', category=self.cat, timeline=datetime.date(2023, 5, 19))
-        self.steps=Step.objects.create(title='Gteps Steps Test 1', timeline=datetime.date(2021, 1, 15), difficulty=10, goal=self.goals)
-        self.steps2=Step.objects.create(title='Gteps Steps Test 2', timeline=datetime.date(2023, 1, 15), difficulty=20, goal=self.goals)
-
-    def testDetailAccessedUsingID(self):
-        response=self.client.get(reverse('gsteps', args=(self.goals.id,)))
-        self.assertEqual(response.status_code, 200)
-    
-    def testNumGoals(self):
-        self.stepnum=Step.objects.filter(goal=self.goals).count()
-        self.assertEqual(self.stepnum, 2)
+#After implementing login, pages can't be accessed without a user
+#See authorization testing below
 
 #FORM TESTING#################################
 
@@ -174,3 +130,108 @@ class StepFormTest(TestCase):
     def testMissingData(self):
         form=StepForm(data={"title":""})
         self.assertFalse(form.is_valid())
+
+
+#PAGE TESTING (NO AUTH)###################################
+
+class IndexTest(TestCase):
+    def testUrlAccessedByName(self):
+        response=self.client.get(reverse('index'))
+        self.assertEqual(response.status_code, 200)
+
+#AUTHENTICATION TESTING#####################################
+
+class ViewCatAuth(TestCase):
+    def setUp(self):
+        self.u=User.objects.create_user(username='bean4', password='P@ssw0rd9')
+        self.u.save()
+        self.cat=Category.objects.create(title="AuthCat", user=self.u)
+
+#Doesn't work without auth, replaced by testLoginRightTemplate()
+    #class CatPageTest(TestCase):
+        # def testUrlAccessedByName(self):
+        #     response=self.client.get(reverse('categories'))
+        #     self.assertEqual(response.status_code, 200)
+
+    def testRedirectNoLogin(self):
+        response=self.client.get(reverse('categories'))
+        self.assertRedirects(response, '/accounts/login/?next=/goals/getcategories/')
+
+    def testLoginRightTemplate(self):
+        login=self.client.login(username='bean4', password='P@ssw0rd9')
+        response=self.client.get(reverse('categories'))
+        self.assertEqual(str(response.context['user']), 'bean4')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'goals/categories.html')
+
+class ViewRewardAuth(TestCase):
+    def setUp(self):
+        self.u=User.objects.create_user(username='bean4', password='P@ssw0rd9')
+        self.u.save()
+        self.reward=Reward.objects.create(title='Test Reward', user=self.u, cost=150)
+
+    def testRedirectNoLogin(self):
+        response=self.client.get(reverse('rewards'))
+        self.assertRedirects(response, '/accounts/login/?next=/goals/getrewards/')
+
+    def testLoginRightTemplate(self):
+        login=self.client.login(username='bean4', password='P@ssw0rd9')
+        response=self.client.get(reverse('rewards'))
+        self.assertEqual(str(response.context['user']), 'bean4')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'goals/rewards.html')
+
+class CatGoalsAuth(TestCase):
+    def setUp(self):
+        self.u=User.objects.create_user(username='bean4', password='P@ssw0rd9')
+        self.u.save()
+        # self.u=User.objects.create(username="armando1", password='P@ssw0rd9')
+        self.cat=Category.objects.create(title='Catgoals Test', description="Test Catgoals page", motivation='For testing', user=self.u)
+        self.goals=Goal.objects.create(title='Catgoals Goal Test', description='Subgoals', motivation='For testing Catgoals subgoals', category=self.cat, timeline=datetime.date(2023, 5, 19))
+
+    # def testDetailAccessedUsingID(self):
+    #     response=self.client.get(reverse('catgoals', args=(self.cat.id,)))
+    #     self.assertEqual(response.status_code, 200)
+    
+    def testNumGoals(self):
+        self.goalnum=Goal.objects.filter(category=self.cat).count()
+        self.assertEqual(self.goalnum, 1)
+
+    def testRedirectNoLogin(self):
+        response=self.client.get(reverse('catgoals', args=(self.cat.id,)))
+        self.assertRedirects(response, '/accounts/login/?next=/goals/catgoals/' + str(self.cat.id))
+
+    def testLoginRightTemplate(self):
+        login=self.client.login(username='bean4', password='P@ssw0rd9')
+        response=self.client.get(reverse('catgoals', args=(self.cat.id,)))
+        self.assertEqual(str(response.context['user']), 'bean4')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'goals/catgoals.html')
+
+class GstepsAuth(TestCase):
+    def setUp(self):
+        self.u=User.objects.create_user(username='bean4', password='P@ssw0rd9')
+        self.u.save()
+        self.cat=Category.objects.create(title='Gsteps Cat Test', description="Test Catgoals page", motivation='For testing', user=self.u)
+        self.goals=Goal.objects.create(title='Gsteps Goal Test', description='Subgoals', motivation='For testing Catgoals subgoals', category=self.cat, timeline=datetime.date(2023, 5, 19))
+        self.steps=Step.objects.create(title='Gteps Steps Test 1', timeline=datetime.date(2021, 1, 15), difficulty=10, goal=self.goals)
+        self.steps2=Step.objects.create(title='Gteps Steps Test 2', timeline=datetime.date(2023, 1, 15), difficulty=20, goal=self.goals)
+
+    # def testDetailAccessedUsingID(self):
+    #     response=self.client.get(reverse('gsteps', args=(self.goals.id,)))
+    #     self.assertEqual(response.status_code, 200)
+    
+    def testNumGoals(self):
+        self.stepnum=Step.objects.filter(goal=self.goals).count()
+        self.assertEqual(self.stepnum, 2)
+
+    def testRedirectNoLogin(self):
+        response=self.client.get(reverse('gsteps', args=(self.goals.id,)))
+        self.assertRedirects(response, '/accounts/login/?next=/goals/gsteps/' + str(self.goals.id))
+
+    def testLoginRightTemplate(self):
+        login=self.client.login(username='bean4', password='P@ssw0rd9')
+        response=self.client.get(reverse('gsteps', args=(self.goals.id,)))
+        self.assertEqual(str(response.context['user']), 'bean4')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'goals/gsteps.html')

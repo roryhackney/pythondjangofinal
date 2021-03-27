@@ -7,7 +7,7 @@
      <th>Description</th>
      <th>Motivation</th>
  </tr>
- {% for c in categorylist %}
+ {% for c in usercats %}
    <tr>
        <td><a href="{% url 'catgoals' id=c.pk %}">{{ c.title }}</a></td>
        <td>{{ c.description }}</td>

@@ -6,12 +6,14 @@
      <th>Title</th>
      <th>Description</th>
      <th>Cost</th>
+     <th>Created By</th>
  </tr>
- {% for r in rewardlist %}
+ {% for r in userrewards %}
    <tr>
        <td>{{ r.title }}</td>
        <td>{{ r.description }}</td>
        <td>{{ r.cost }}</td>
+       <td>{{ r.user }}</td>
    </tr>
  {% endfor %}
 </table>

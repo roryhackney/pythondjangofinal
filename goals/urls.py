@@ -12,4 +12,6 @@ urlpatterns = [
     path('newgoal/', views.newgoal, name='newgoal'),
     path('newstep/', views.newstep, name='newstep'),
     path('newreward/', views.newreward, name='newreward'),
+    path('loginmessage/', views.loginmessage, name='loginmessage'),
+    path('logoutmessage/', views.logoutmessage, name='logoutmessage'),
 ]
