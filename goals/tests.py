@@ -4,7 +4,8 @@ from django.contrib.auth.models import User
 import datetime
 from django.urls import reverse
 from .views import index, getrewards, getcategories, catgoals, gsteps
-
+from .forms import CatForm, GoalForm, StepForm, RewardForm
+from django import forms
 
 # Create your tests here.
 
@@ -120,3 +121,56 @@ class GstepsTest(TestCase):
     def testNumGoals(self):
         self.stepnum=Step.objects.filter(goal=self.goals).count()
         self.assertEqual(self.stepnum, 2)
+
+#FORM TESTING#################################
+
+class CategoryFormTest(TestCase):
+    def setUp(self):
+        self.u=User.objects.create(username="bob74", password="P@ssw0rd9")
+        
+    def testFullValid(self):
+        form=CatForm(data={"title": "NewCatTest", "description": "A test", "motivation": "To test New Category form", "user": self.u})
+        self.assertTrue(form.is_valid())
+
+    def testPartialDataValid(self):
+        form=CatForm(data={"title": "PartCatTest", "user": self.u})
+        self.assertTrue(form.is_valid())
+
+    def testMissingData(self):
+        form=CatForm(data={"title":"", "user": self.u})
+        self.assertFalse(form.is_valid())
+
+class GoalFormTest(TestCase):
+    def setUp(self):
+        self.u=User.objects.create(username="bob74", password="P@ssw0rd9")
+        self.category=Category.objects.create(title="Test Cat", user=self.u)
+
+    def testFullValid(self):
+        form=GoalForm(data={"title": "NewGoalTest", "description": "A test", "motivation": "To test New Goal form", "timeline": datetime.date(2021, 6, 2), "category": self.category})
+        self.assertTrue(form.is_valid())
+
+    def testPartialDataValid(self):
+        form=GoalForm(data={"title": "NewGoalTest", "timeline": datetime.date(2021, 6, 2), "category": self.category})        
+        self.assertTrue(form.is_valid())
+
+    def testMissingData(self):
+        form=GoalForm(data={"title":""})
+        self.assertFalse(form.is_valid())
+
+class StepFormTest(TestCase):
+    def setUp(self):
+        self.u=User.objects.create(username="bob74", password="P@ssw0rd9")
+        self.category=Category.objects.create(title="Test Cat", user=self.u)
+        self.goal=Goal.objects.create(title='Test Goal', category=self.category, timeline=datetime.date(2023, 1, 4))
+
+    def testFullValid(self):
+        form=StepForm(data={"title": "NewStepTest", "description": "A test", "timeline": datetime.date(2021, 6, 2), "goal": self.goal, "difficulty": 10})
+        self.assertTrue(form.is_valid())
+
+    def testPartialDataValid(self):
+        form=StepForm(data={"title": "NewStepTest", "timeline": datetime.date(2021, 6, 2), "goal": self.goal, "difficulty":20})
+        self.assertTrue(form.is_valid())
+
+    def testMissingData(self):
+        form=StepForm(data={"title":""})
+        self.assertFalse(form.is_valid())

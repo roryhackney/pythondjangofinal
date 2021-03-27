@@ -1,5 +1,6 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from .models import Category, Goal, Step, Reward, Profile
+from .forms import CatForm, GoalForm, StepForm, RewardForm
 
 # Create your views here.
 def index(request):
@@ -35,3 +36,55 @@ def gsteps(request, id):
         'gsteps' : gsteps,
     }
     return render(request, 'goals/gsteps.html', context=context)
+
+def formsuccess(request):
+    response=redirect('goals/formsuccess.html')
+    return response
+
+def newcat(request):
+    form=CatForm
+    if request.method=='POST':
+        form=CatForm(request.POST)
+        if form.is_valid():
+            post=form.save(commit=True)
+            post.save
+            return render(request, 'goals/formsuccess.html')
+    else:
+        form=CatForm()
+    return render(request, 'goals/newcat.html', {'form' : form})
+
+def newgoal(request):
+    form=GoalForm()
+    if request.method=='POST':
+        form=GoalForm(request.POST)
+        if form.is_valid():
+            post=form.save(commit=True)
+            post.save
+            return render(request, 'goals/formsuccess.html')
+    else:
+        form=GoalForm()
+    return render(request, 'goals/newgoal.html', {'form': form})
+
+def newstep(request):
+    form=StepForm()
+    if request.method=='POST':
+        form=StepForm(request.POST)
+        if form.is_valid():
+            post=form.save(commit=True)
+            post.save
+            return render(request, 'goals/formsuccess.html')
+    else:
+        form=StepForm()
+    return render(request, 'goals/newstep.html', {'form': form})
+
+def newreward(request):
+    form=RewardForm()
+    if request.method=='POST':
+        form=RewardForm(request.POST)
+        if form.is_valid():
+            post=form.save(commit=True)
+            post.save
+            return render(request, 'goals/formsuccess.html')
+    else:
+        form=RewardForm()
+    return render(request, 'goals/newreward.html', {'form': form})
